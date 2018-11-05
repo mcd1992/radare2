@@ -377,10 +377,12 @@ R_API void r_cons_log_callback(const char *output, const char *funcname, const c
 	} else {
 		r_cons_strcat (output);
 	}
+
+	if (I.user) {
+		// TODO: r_event_send
+	}
 }
 
-// Stub function that cb_main_output gets pointed to in util/log.c by r_cons_new
-// This allows Cutter to set per-task logging redirection
 R_API RCons *r_cons_new() {
 	I.refcnt++;
 	if (I.refcnt != 1) {

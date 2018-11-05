@@ -62,7 +62,6 @@ R_API void r_log_set_file(const char *filename);
 R_API void r_log_set_srcinfo(bool show_info);
 R_API void r_log_set_colors(bool show_colors);
 R_API void r_log_set_traplevel(RLogLevel level);
-// TODO: r_log_set_options(enum RLogOptions)
 
 // Functions for adding log callbacks
 // TODO: Add context/*user for callbacks (Wanted by Cutter)

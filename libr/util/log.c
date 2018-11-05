@@ -49,7 +49,7 @@ R_API void r_log_set_colors(bool show_info) {
  * \brief Add a logging callback
  * \param cbfunc RLogCallback style function to be called
  */
-R_API void r_log_add_callback(RLogCallback cbfunc) {
+R_API void r_log_add_callback(RLogCallback cbfunc) { // TODO: user/context support
 	if (!log_cbs) {
 		log_cbs = r_list_new ();
 	}
@@ -68,6 +68,18 @@ R_API void r_log_del_callback(RLogCallback cbfunc) {
 	}
 }
 
+/**
+ * \brief Logging function that takes a va_list
+ * \param funcname Contains the function name of the calling function
+ * \param filename Contains the filename that funcname is defined in
+ * \param lineno The line number that this log call is being made from in filename
+ * \param level Logging level for output
+ * \param tag A string to be prefixed to the output (Like WARNING)
+ * \param fmtstr A printf like string
+ * \param args A va_list of parameters related to fmtstr
+
+  This function is used by the R_LOG_* preprocessor macros for logging
+*/
 R_API void r_vlog(const char *funcname, const char *filename,
 	ut32 lineno, RLogLevel level, const char *tag, const char *fmtstr, va_list args) {
 	if (level < cfg_loglvl && level < cfg_logtraplvl) {
@@ -122,6 +134,8 @@ R_API void r_vlog(const char *funcname, const char *filename,
 		}
 	}
 
+	// Note: r_event_send is called in cons.c
+
 	if (level >= cfg_logtraplvl && level != R_LOGLVL_NONE) {
 		fflush (stdout); // We're about to exit HARD, flush buffers before dying
 		fflush (stderr);
@@ -131,12 +145,14 @@ R_API void r_vlog(const char *funcname, const char *filename,
 }
 
 /**
- * \brief Internal logging function used by preprocessor macros
+ * \brief Logging function used by preprocessor macros and passed to r_vlog
  * \param funcname Contains the function name of the calling function
  * \param filename Contains the filename that funcname is defined in
  * \param lineno The line number that this log call is being made from in filename
- * \param lvl Logging level for output
+ * \param level Logging level for output
+ * \param tag A string to be prefixed to the output (Like WARNING)
  * \param fmtstr A printf like string
+ * \param ... Varadict arguments (optional)
 
   This function is used by the R_LOG_* preprocessor macros for logging
 */

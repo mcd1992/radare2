@@ -16,6 +16,7 @@ typedef struct r_event_t {
 typedef enum {
 	R_EVENT_ALL = 0,
 	R_EVENT_META_SET,
+	R_EVENT_LOG_PRINT,
 	R_EVENT_MAX,
 } REventType;
 
@@ -24,6 +25,11 @@ typedef struct r_event_meta_t {
 	ut64 addr;
 	const char *string;
 } REventMeta;
+
+typedef struct r_event_log_t {
+	int type;
+	// TODO
+} REventLog;
 
 typedef void (*REventCallback)(REvent *ev, REventType type, void *data);
 
