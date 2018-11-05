@@ -12,25 +12,11 @@
 #define MACRO_WEAK_SYM __attribute__ ((weak))
 #endif
 
-typedef enum r_log_level {
-	R_LOGLVL_SILLY = 0,
-	R_LOGLVL_DEBUG = 1,
-	R_LOGLVL_VERBOSE = 2,
-	R_LOGLVL_INFO = 3,
-	R_LOGLVL_WARN = 4,
-	R_LOGLVL_ERROR = 5,
-	R_LOGLVL_FATAL = 6, // This will call r_sys_breakpoint() and trap the process for debugging!
-	R_LOGLVL_NONE = 0xFF
-} RLogLevel;
-
 #if R_CHECKS_LEVEL >= 2
 #define R_DEFAULT_LOGLVL R_LOGLVL_WARN
 #else
 #define R_DEFAULT_LOGLVL R_LOGLVL_ERROR
 #endif
-
-typedef void (*RLogCallback) (const char *output, const char *funcname, const char *filename,
-	ut32 lineno, RLogLevel level, const char *tag, const char *fmtstr, ...);
 
 #define R_VLOG(lvl, tag, fmtstr, args) r_vlog (MACRO_LOG_FUNC, __FILE__, \
 	__LINE__, lvl, tag, fmtstr, args);
@@ -56,6 +42,20 @@ typedef void (*RLogCallback) (const char *output, const char *funcname, const ch
 extern "C" {
 #endif
 
+typedef enum r_log_level {
+	R_LOGLVL_SILLY = 0,
+	R_LOGLVL_DEBUG = 1,
+	R_LOGLVL_VERBOSE = 2,
+	R_LOGLVL_INFO = 3,
+	R_LOGLVL_WARN = 4,
+	R_LOGLVL_ERROR = 5,
+	R_LOGLVL_FATAL = 6, // This will call r_sys_breakpoint() and trap the process for debugging!
+	R_LOGLVL_NONE = 0xFF
+} RLogLevel;
+
+typedef void (*RLogCallback) (const char *output, const char *funcname, const char *filename,
+	ut32 lineno, RLogLevel level, const char *tag, const char *fmtstr, va_list args);
+
 // Called by r_core to set the configuration variables
 R_API void r_log_set_level(RLogLevel level);
 R_API void r_log_set_file(const char *filename);
@@ -65,6 +65,7 @@ R_API void r_log_set_traplevel(RLogLevel level);
 // TODO: r_log_set_options(enum RLogOptions)
 
 // Functions for adding log callbacks
+// TODO: Add context/*user for callbacks (Wanted by Cutter)
 R_API void r_log_add_callback(RLogCallback cbfunc);
 R_API void r_log_del_callback(RLogCallback cbfunc);
 // TODO: r_log_get_callbacks()

@@ -368,6 +368,17 @@ R_API bool r_cons_enable_mouse(const bool enable) {
 #endif
 }
 
+// Default callback added to RLog when r_cons_new is called
+R_API void r_cons_log_callback(const char *output, const char *funcname, const char *filename,
+	ut32 lineno, RLogLevel level, const char *tag, const char *fmtstr, va_list args) {
+	if (!I.null && I.context->log_callback) {
+		// log.c handles the va_start and va_end
+		I.context->log_callback (output, funcname, filename, lineno, level, tag, fmtstr, args);
+	} else {
+		r_cons_strcat (output);
+	}
+}
+
 // Stub function that cb_main_output gets pointed to in util/log.c by r_cons_new
 // This allows Cutter to set per-task logging redirection
 R_API RCons *r_cons_new() {
@@ -431,8 +442,10 @@ R_API RCons *r_cons_new() {
 	r_cons_reset ();
 	r_cons_rgb_init ();
 	r_cons_pal_init ();
-
 	r_print_set_is_interrupted_cb (r_cons_is_breaked);
+
+	// This adds a 'default' logging callback so cons can handle per-task logging output
+	r_log_add_callback (r_cons_log_callback);
 
 	return &I;
 }

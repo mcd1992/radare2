@@ -14,13 +14,13 @@ static bool cfg_logsrcinfo = false; // Print out debug source info with the outp
 static bool cfg_logcolors = false; // Output colored log text based on level
 static char cfg_logfile[LOG_CONFIGSTR_SIZE] = ""; // Output text to filename
 static const char *level_tags[] = { // Log level to tag string lookup array
-	[R_LOGLVL_SILLY]     = "SILLY",
-	[R_LOGLVL_VERBOSE]   = "VERBOSE",
-	[R_LOGLVL_DEBUG]     = "DEBUG",
-	[R_LOGLVL_INFO]      = "INFO",
-	[R_LOGLVL_WARN]      = "WARNING",
-	[R_LOGLVL_ERROR]     = "ERROR",
-	[R_LOGLVL_FATAL]     = "FATAL"
+	[R_LOGLVL_SILLY] = "SILLY",
+	[R_LOGLVL_VERBOSE] = "VERBOSE",
+	[R_LOGLVL_DEBUG] = "DEBUG",
+	[R_LOGLVL_INFO] = "INFO",
+	[R_LOGLVL_WARN] = "WARNING",
+	[R_LOGLVL_ERROR] = "ERROR",
+	[R_LOGLVL_FATAL] = "FATAL"
 };
 
 // cconfig.c configuration callback functions below
@@ -70,14 +70,13 @@ R_API void r_log_del_callback(RLogCallback cbfunc) {
 
 R_API void r_vlog(const char *funcname, const char *filename,
 	ut32 lineno, RLogLevel level, const char *tag, const char *fmtstr, va_list args) {
-	va_list args_copy;
-	va_copy (args_copy, args);
-
 	if (level < cfg_loglvl && level < cfg_logtraplvl) {
 		// Don't print if output level is lower than current level
 		// Don't ignore fatal/trap errors
 		return;
 	}
+	va_list args_saved;
+	va_copy (args_saved, args);
 
 	// TODO: Colors
 
@@ -99,12 +98,15 @@ R_API void r_vlog(const char *funcname, const char *filename,
 		RLogCallback cb;
 
 		r_list_foreach (log_cbs, it, cb) {
-			cb (output_buf, funcname, filename, lineno, level, NULL, fmtstr, args_copy);
+			va_list args_it;
+			va_copy (args_it, args_saved);
+			cb (output_buf, funcname, filename, lineno, level, tag, fmtstr, args_it);
+			va_end (args_it);
 		}
 	} else {
 		fprintf (stderr, "%s", output_buf);
 	}
-	va_end (args_copy);
+	va_end (args_saved);
 
 	// Log to file if enabled
 	if (cfg_logfile[0] != 0x00) {
